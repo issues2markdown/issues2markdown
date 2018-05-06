@@ -39,7 +39,7 @@ cover-html: cover-profile	## Generate coverage report
 
 .PHONY: coveralls
 coveralls:
-	goveralls -service circle-ci -repotoken <repo>
+	goveralls -service circle-ci -repotoken k8bPdeju0ABC2SVscf6eJde4VBngDYVd7
 
 # Lint
 
