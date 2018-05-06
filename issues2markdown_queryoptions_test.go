@@ -20,7 +20,7 @@ package issues2markdown_test
 import (
 	"testing"
 
-	"github.com/repejota/issues2markdown"
+	"github.com/issues2markdown/issues2markdown"
 )
 
 func TestIntanceQueryOptions(t *testing.T) {

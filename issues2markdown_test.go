@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/github"
-	"github.com/repejota/issues2markdown"
+	"github.com/issues2markdown/issues2markdown"
 )
 
 func testMethod(t *testing.T, r *http.Request, want string) {
