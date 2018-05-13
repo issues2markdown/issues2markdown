@@ -40,10 +40,8 @@ type QueryOptions struct {
 }
 
 // NewQueryOptions creates a new QueryOptions instance with sensible defaults
-func NewQueryOptions(username string) *QueryOptions {
-	options := &QueryOptions{
-		Organization: username,
-	}
+func NewQueryOptions() *QueryOptions {
+	options := &QueryOptions{}
 	return options
 }
 
@@ -110,26 +108,34 @@ func (im *IssuesToMarkdown) Query(options *QueryOptions) ([]Issue, error) {
 	ctx := context.Background()
 
 	// query issues
-	query := options.BuildQuey()
-	githubOptions := &github.SearchOptions{}
-	listResult, _, err := im.client.Search.Issues(ctx, query, githubOptions)
-	if err != nil {
-		log.Printf("ERROR: %s", err)
-		return nil, err
-	}
-	log.Printf("Search Query: %s\n", query)
-	log.Printf("Total results: %d\n", *listResult.Total)
-
-	// process results
 	var result []Issue
-	for _, v := range listResult.Issues {
-		item := Issue{
-			Title:   *v.Title,
-			State:   *v.State,
-			URL:     *v.URL,
-			HTMLURL: *v.HTMLURL,
+	query := options.BuildQuey()
+	log.Printf("Search Query: %s\n", query)
+
+	githubOptions := &github.SearchOptions{}
+	for {
+		listResult, response, err := im.client.Search.Issues(ctx, query, githubOptions)
+		if err != nil {
+			log.Printf("ERROR: %s", err)
+			return nil, err
 		}
-		result = append(result, item)
+
+		// process page results
+		for _, v := range listResult.Issues {
+			item := Issue{
+				Title:   *v.Title,
+				State:   *v.State,
+				URL:     *v.URL,
+				HTMLURL: *v.HTMLURL,
+			}
+			result = append(result, item)
+		}
+
+		// process pagination
+		if response.NextPage == 0 {
+			break
+		}
+		githubOptions.Page = response.NextPage
 	}
 
 	return result, nil

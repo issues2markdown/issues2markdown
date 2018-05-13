@@ -24,7 +24,8 @@ import (
 )
 
 func TestIntanceQueryOptions(t *testing.T) {
-	options := issues2markdown.NewQueryOptions("username")
+	options := issues2markdown.NewQueryOptions()
+	options.Organization = "username"
 
 	expectedOrganization := "username"
 	if options.Organization != expectedOrganization {
@@ -33,18 +34,12 @@ func TestIntanceQueryOptions(t *testing.T) {
 }
 
 func TestBuildQueryQueryOptions(t *testing.T) {
-	options := issues2markdown.NewQueryOptions("username")
+	options := issues2markdown.NewQueryOptions()
+	options.Organization = "username"
 
-	expectedQuery := "type:issue org:username state:open state:closed"
+	expectedQuery := "type:issue org:username"
 	query := options.BuildQuey()
 	if query != expectedQuery {
 		t.Fatalf("Default QueryOptions query expected to be %q but got %q", expectedQuery, query)
-	}
-
-	options.Organization = "organization"
-	expectedQuery = "type:issue org:organization state:open state:closed"
-	query = options.BuildQuey()
-	if query != expectedQuery {
-		t.Fatalf("QueryOptions query expected to be %q but got %q", expectedQuery, query)
 	}
 }
