@@ -37,15 +37,12 @@ const (
 // QueryOptions are the available options to modify the query of issues
 type QueryOptions struct {
 	Organization string
-	Repository   string
-	State        string
 }
 
 // NewQueryOptions creates a new QueryOptions instance with sensible defaults
 func NewQueryOptions(username string) *QueryOptions {
 	options := &QueryOptions{
 		Organization: username,
-		State:        "all",
 	}
 	return options
 }
@@ -57,28 +54,11 @@ func (qo *QueryOptions) BuildQuey() string {
 	query := strings.Builder{}
 	// whe only want issues
 	_, _ = query.WriteString("type:issue")
+
 	// organization
-	if qo.Repository == "" {
-		_, _ = query.WriteString(
-			fmt.Sprintf(" org:%s",
-				qo.Organization))
-	}
-	// organization & repository
-	if qo.Repository != "" {
-		_, _ = query.WriteString(
-			fmt.Sprintf(" repo:%s/%s",
-				qo.Organization,
-				qo.Repository))
-	}
-	// issue status
-	if qo.State != "" {
-		if qo.State == "all" {
-			_, _ = query.WriteString(
-				fmt.Sprintf(" state:open state:closed"))
-		} else {
-			_, _ = query.WriteString(fmt.Sprintf(" state:%s", qo.State))
-		}
-	}
+	_, _ = query.WriteString(
+		fmt.Sprintf(" org:%s",
+			qo.Organization))
 	return query.String()
 }
 

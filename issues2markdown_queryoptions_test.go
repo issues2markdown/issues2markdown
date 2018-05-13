@@ -30,16 +30,6 @@ func TestIntanceQueryOptions(t *testing.T) {
 	if options.Organization != expectedOrganization {
 		t.Fatalf("Default Organization filter expected to be %q but got %q", expectedOrganization, options.Organization)
 	}
-
-	expectedRepository := ""
-	if options.Repository != expectedRepository {
-		t.Fatalf("Default Repository filter expected to be %q but got %q", expectedRepository, options.Repository)
-	}
-
-	expectedState := "all"
-	if options.State != expectedState {
-		t.Fatalf("Default State filter expected to be %q but got %q", expectedState, options.State)
-	}
 }
 
 func TestBuildQueryQueryOptions(t *testing.T) {
@@ -53,27 +43,6 @@ func TestBuildQueryQueryOptions(t *testing.T) {
 
 	options.Organization = "organization"
 	expectedQuery = "type:issue org:organization state:open state:closed"
-	query = options.BuildQuey()
-	if query != expectedQuery {
-		t.Fatalf("QueryOptions query expected to be %q but got %q", expectedQuery, query)
-	}
-
-	options.Repository = "repository"
-	expectedQuery = "type:issue repo:organization/repository state:open state:closed"
-	query = options.BuildQuey()
-	if query != expectedQuery {
-		t.Fatalf("QueryOptions query expected to be %q but got %q", expectedQuery, query)
-	}
-
-	options.State = "open"
-	expectedQuery = "type:issue repo:organization/repository state:open"
-	query = options.BuildQuey()
-	if query != expectedQuery {
-		t.Fatalf("QueryOptions query expected to be %q but got %q", expectedQuery, query)
-	}
-
-	options.State = "closed"
-	expectedQuery = "type:issue repo:organization/repository state:closed"
 	query = options.BuildQuey()
 	if query != expectedQuery {
 		t.Fatalf("QueryOptions query expected to be %q but got %q", expectedQuery, query)
