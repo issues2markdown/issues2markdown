@@ -48,15 +48,14 @@ func NewQueryOptions() *QueryOptions {
 // BuildQuey builds the query string to query issues
 //
 // It modifies the default query according the proviced query options
-func (qo *QueryOptions) BuildQuey() string {
+func (qo *QueryOptions) BuildQuey(q string) string {
 	query := strings.Builder{}
 	// whe only want issues
 	_, _ = query.WriteString("type:issue")
-
 	// organization
-	_, _ = query.WriteString(
-		fmt.Sprintf(" org:%s",
-			qo.Organization))
+	_, _ = query.WriteString(fmt.Sprintf(" org:%s", qo.Organization))
+	// append query
+	_, _ = query.WriteString(fmt.Sprintf(" %s", q))
 	return query.String()
 }
 
@@ -104,12 +103,12 @@ func NewIssuesToMarkdown(provider *github.Client) (*IssuesToMarkdown, error) {
 
 // Query queries the provider and returns the list of Issues that match
 // the query
-func (im *IssuesToMarkdown) Query(options *QueryOptions) ([]Issue, error) {
+func (im *IssuesToMarkdown) Query(options *QueryOptions, q string) ([]Issue, error) {
 	ctx := context.Background()
 
 	// query issues
 	var result []Issue
-	query := options.BuildQuey()
+	query := options.BuildQuey(q)
 	log.Printf("Search Query: %s\n", query)
 
 	githubOptions := &github.SearchOptions{}
