@@ -22,12 +22,6 @@ import (
 	"strings"
 )
 
-const (
-	// DefaultIssueTemplate is the default template to render a list of issues in Markdown
-	DefaultIssueTemplate = `{{ range . }}- [{{ if eq .State "closed" }}x{{ else }} {{ end }}] {{ .GetOrganization }}/{{ .GetRepository }} : [{{ .Title }}]({{ .HTMLURL }})
-{{ end }}`
-)
-
 // QueryOptions are the available options to modify the query of issues
 type QueryOptions struct {
 	Organization string

@@ -17,6 +17,12 @@
 
 package issues2markdown
 
+const (
+	// DefaultIssueTemplate is the default template to render a list of issues in Markdown
+	DefaultIssueTemplate = `{{ range . }}- [{{ if eq .State "closed" }}x{{ else }} {{ end }}] {{ .GetOrganization }}/{{ .GetRepository }} : [{{ .Title }}]({{ .HTMLURL }})
+{{ end }}`
+)
+
 // RenderOptions are the available options to modify the rendering of issues
 type RenderOptions struct {
 	TemplateSource string
