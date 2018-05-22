@@ -18,8 +18,16 @@
 package issues2markdown
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"strings"
+)
+
+const (
+	// DefaultQuery is the default query to be used if none is provided on the
+	// CLI arguments.
+	DefaultQuery = `is:issue is:open author:{{ .Login }} archived:false`
 )
 
 // QueryOptions are the available options to modify the query of issues
@@ -38,11 +46,18 @@ func NewQueryOptions() *QueryOptions {
 // It modifies the default query according the proviced query options
 func (qo *QueryOptions) BuildQuey(q string) string {
 	query := strings.Builder{}
+
+	// If query is none we use the default one
+	if q == "" {
+		var compiled bytes.Buffer
+		t := template.Must(template.New("issueslist").Parse(DefaultQuery))
+		_ = t.Execute(&compiled, qo)
+		return compiled.String()
+	}
+
 	// whe only want issues
 	_, _ = query.WriteString("type:issue")
-	// organization
-	_, _ = query.WriteString(fmt.Sprintf(" org:%s", qo.Organization))
-	// append query
+	// append queries provided by CLI arguments
 	_, _ = query.WriteString(fmt.Sprintf(" %s", q))
 	return query.String()
 }
