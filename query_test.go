@@ -37,7 +37,7 @@ func TestBuildQueryQueryOptions(t *testing.T) {
 	options := issues2markdown.NewQueryOptions()
 	options.Organization = "username"
 
-	expectedQuery := "type:issue org:username "
+	expectedQuery := "is:issue is:open author:username archived:false"
 	query := options.BuildQuey("")
 	if query != expectedQuery {
 		t.Fatalf("Default QueryOptions query expected to be %q but got %q", expectedQuery, query)
