@@ -20,57 +20,12 @@ package issues2markdown
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"html/template"
 	"log"
 	"strings"
 
 	"github.com/google/go-github/github"
 )
-
-const (
-	// DefaultIssueTemplate is the default template to render a list of issues in Markdown
-	DefaultIssueTemplate = `{{ range . }}- [{{ if eq .State "closed" }}x{{ else }} {{ end }}] {{ .GetOrganization }}/{{ .GetRepository }} : [{{ .Title }}]({{ .HTMLURL }})
-{{ end }}`
-)
-
-// QueryOptions are the available options to modify the query of issues
-type QueryOptions struct {
-	Organization string
-}
-
-// NewQueryOptions creates a new QueryOptions instance with sensible defaults
-func NewQueryOptions() *QueryOptions {
-	options := &QueryOptions{}
-	return options
-}
-
-// BuildQuey builds the query string to query issues
-//
-// It modifies the default query according the proviced query options
-func (qo *QueryOptions) BuildQuey(q string) string {
-	query := strings.Builder{}
-	// whe only want issues
-	_, _ = query.WriteString("type:issue")
-	// organization
-	_, _ = query.WriteString(fmt.Sprintf(" org:%s", qo.Organization))
-	// append query
-	_, _ = query.WriteString(fmt.Sprintf(" %s", q))
-	return query.String()
-}
-
-// RenderOptions are the available options to modify the rendering of issues
-type RenderOptions struct {
-	TemplateSource string
-}
-
-// NewRenderOptions creates a new RenderOptions instance with sensible defaults
-func NewRenderOptions() *RenderOptions {
-	options := &RenderOptions{
-		TemplateSource: DefaultIssueTemplate,
-	}
-	return options
-}
 
 // IssuesToMarkdown is the main type to interact, query and render issues to
 // Markdown
