@@ -18,7 +18,7 @@ version:	## Show version information
 # Testing
 
 .PHONY: test
-test:	## Execute package tests 
+test:		## Execute package tests 
 	go test -v $(PACKAGES)
 
 .PHONY: cover-profile
@@ -30,11 +30,13 @@ cover-profile:
 	rm -rf coverage.out
 
 .PHONY: cover
-cover: cover-profile	## Generate test coverage data
+cover: cover-profile		
+cover: 		## Generate test coverage data
 	go tool cover -func=coverage-all.out
 
 .PHONY: cover-html
-cover-html: cover-profile	## Generate coverage report
+cover-html: cover-profile	
+cover-html: 	## Generate coverage report
 	go tool cover -html=coverage-all.out
 
 .PHONY: coveralls
@@ -43,12 +45,12 @@ coveralls:
 
 # Lint
 
-lint:	## Lint source code
+lint:		## Lint source code
 	gometalinter --disable-all --enable=errcheck --enable=vet --enable=vetshadow
 
 # Dependencies
 
-deps:	## Install package dependencies
+deps:		## Install package dependencies
 	go get -u github.com/google/go-github/github
 	go get -u golang.org/x/oauth2
 	
@@ -61,7 +63,7 @@ dev-deps:	## Install dev dependencies
 # Cleaning up
 
 .PHONY: clean
-clean:	## Delete generated development environment
+clean:		## Delete generated development environment
 	go clean
 	rm -rf coverage-all.out
 
@@ -70,6 +72,4 @@ clean:	## Delete generated development environment
 godoc-serve:	## Serve documentation (godoc format) for this package at port HTTP 9090
 	godoc -http=":9090"
 
-.PHONY: help
-help:	## Show this help
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+include Makefile.help.mk
