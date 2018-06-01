@@ -24,6 +24,7 @@ import (
 
 // Issue represents an Issue from the provider
 type Issue struct {
+	Number  int
 	Title   string
 	State   string
 	URL     string

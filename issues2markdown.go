@@ -77,6 +77,7 @@ func (im *IssuesToMarkdown) Query(options *QueryOptions, q string) ([]Issue, err
 		// process page results
 		for _, v := range listResult.Issues {
 			item := Issue{
+				Number:  *v.Number,
 				Title:   *v.Title,
 				State:   *v.State,
 				URL:     *v.URL,
