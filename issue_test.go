@@ -24,7 +24,10 @@ import (
 )
 
 func TestInstanceIssue(t *testing.T) {
-	_ = issues2markdown.NewIssue()
+	issue := issues2markdown.NewIssue()
+	if issue == nil {
+		t.Fatalf("Issue should not be nil")
+	}
 }
 
 func TestGetOrganizationIssue(t *testing.T) {
