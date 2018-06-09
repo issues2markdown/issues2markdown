@@ -5,7 +5,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/issues2markdown/issues2markdown/badge.svg?branch=master)](https://coveralls.io/github/issues2markdown/issues2markdown?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/issues2markdown/issues2markdown)](https://goreportcard.com/report/github.com/issues2markdown/issues2markdown)
 
-Converts a list of issues and renders the result to markdown following the Github Flavoured Markdown task lists format.
+Converts a list of issues and renders the result to markdown following the
+Github Flavoured Markdown task lists format.
 
 ## License
 
