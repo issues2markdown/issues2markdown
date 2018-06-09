@@ -51,7 +51,6 @@ func NewIssuesToMarkdown(provider *github.Client) (*IssuesToMarkdown, error) {
 		return nil, err
 	}
 	i2md.Username = user.GetLogin()
-	log.Printf("Created authenticated github API client for user: %s\n", i2md.Username)
 
 	return i2md, nil
 }
