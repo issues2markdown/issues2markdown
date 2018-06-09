@@ -18,6 +18,7 @@
 package issues2markdown_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/issues2markdown/issues2markdown"
+	"golang.org/x/oauth2"
 )
 
 func testMethod(t *testing.T, r *http.Request, want string) {
@@ -49,9 +51,18 @@ func providerSetup(t *testing.T) (client *github.Client, mux *http.ServeMux, ser
 	// server is a test HTTP server used to provide mock API responses.
 	server := httptest.NewServer(apiHandler)
 
+	ctx := context.Background()
+
 	// client is the GitHub client being tested and is
 	// configured to use test server.
-	client = github.NewClient(nil)
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{
+			AccessToken: "github_token",
+		},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client = github.NewClient(tc)
+
 	url, _ := url.Parse(server.URL + "/")
 	client.BaseURL = url
 	client.UploadURL = url
@@ -69,6 +80,20 @@ func TestInstanceIssuesToMarkdown(t *testing.T) {
 
 	_, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
 	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestInstanceIssuesToMarkdownUnauthorized(t *testing.T) {
+	issuesProvider, mux, _, teardown := providerSetup(t)
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		http.Error(w, "Unauthorized", 401)
+	})
+	defer teardown()
+
+	_, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
+	if err == nil {
 		t.Fatal(err)
 	}
 }
