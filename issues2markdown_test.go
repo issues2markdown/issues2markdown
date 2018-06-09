@@ -97,3 +97,46 @@ func TestInstanceIssuesToMarkdownUnauthorized(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRender(t *testing.T) {
+	issuesProvider, mux, _, teardown := providerSetup(t)
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		fmt.Fprint(w, `{"login": "username"}`)
+	})
+	issues := []issues2markdown.Issue{
+		{
+			Number:  1,
+			Title:   "Issue title 1",
+			State:   "open",
+			URL:     "https://api.github.com/repos/username/repo/issues/120",
+			HTMLURL: "https://github.com/username/repo/issues/1",
+		},
+		{
+			Number:  2,
+			Title:   "Issue title 2",
+			State:   "closed",
+			URL:     "https://api.github.com/repos/username/repo/issues/2",
+			HTMLURL: "https://github.com/username/repo/issues/2",
+		},
+	}
+	defer teardown()
+
+	i2md, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	options := issues2markdown.NewRenderOptions()
+	markdown, err := i2md.Render(issues, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedMarkdown := `- [ ] username/repo : [#1 Issue title 1](https://github.com/username/repo/issues/1)
+- [x] username/repo : [#2 Issue title 2](https://github.com/username/repo/issues/2)`
+
+	if markdown != expectedMarkdown {
+		t.Fatalf("Expected %q but got %q", expectedMarkdown, markdown)
+	}
+}
