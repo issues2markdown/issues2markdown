@@ -74,6 +74,7 @@ func TestInstanceIssuesToMarkdown(t *testing.T) {
 	issuesProvider, mux, _, teardown := providerSetup(t)
 	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		fmt.Fprint(w, `{"login": "username"}`)
 	})
 	defer teardown()
@@ -88,6 +89,7 @@ func TestInstanceIssuesToMarkdownUnauthorized(t *testing.T) {
 	issuesProvider, mux, _, teardown := providerSetup(t)
 	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		http.Error(w, "Unauthorized", 401)
 	})
 	defer teardown()
@@ -98,10 +100,38 @@ func TestInstanceIssuesToMarkdownUnauthorized(t *testing.T) {
 	}
 }
 
+func TestQuery(t *testing.T) {
+	issuesProvider, mux, _, teardown := providerSetup(t)
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		fmt.Fprint(w, `{"login": "username"}`)
+	})
+	mux.HandleFunc("/search/issues", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		fmt.Fprint(w, `{}`)
+	})
+	defer teardown()
+
+	i2md, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	q := ""
+	options := issues2markdown.NewQueryOptions()
+	_, err = i2md.Query(options, q)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRender(t *testing.T) {
 	issuesProvider, mux, _, teardown := providerSetup(t)
 	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		fmt.Fprint(w, `{"login": "username"}`)
 	})
 	issues := []issues2markdown.Issue{
@@ -109,7 +139,7 @@ func TestRender(t *testing.T) {
 			Number:  1,
 			Title:   "Issue title 1",
 			State:   "open",
-			URL:     "https://api.github.com/repos/username/repo/issues/120",
+			URL:     "https://api.github.com/repos/username/repo/issues/1",
 			HTMLURL: "https://github.com/username/repo/issues/1",
 		},
 		{
