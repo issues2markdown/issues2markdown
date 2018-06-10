@@ -27,7 +27,7 @@ import (
 const (
 	// DefaultQuery is the default query to be used if none is provided on the
 	// CLI arguments.
-	DefaultQuery = `is:issue is:open author:{{ .Organization }} archived:false`
+	DefaultQuery = `type:issue is:open author:{{ .Organization }} archived:false`
 )
 
 // QueryOptions are the available options to modify the query of issues

@@ -33,12 +33,23 @@ func TestIntanceQueryOptions(t *testing.T) {
 	}
 }
 
+func TestBuildQueryDefaultQueryOptions(t *testing.T) {
+	options := issues2markdown.NewQueryOptions()
+	options.Organization = "username"
+
+	expectedQuery := "type:issue is:open author:username archived:false"
+	query := options.BuildQuey("")
+	if query != expectedQuery {
+		t.Fatalf("Default QueryOptions query expected to be %q but got %q", expectedQuery, query)
+	}
+}
+
 func TestBuildQueryQueryOptions(t *testing.T) {
 	options := issues2markdown.NewQueryOptions()
 	options.Organization = "username"
 
-	expectedQuery := "is:issue is:open author:username archived:false"
-	query := options.BuildQuey("")
+	expectedQuery := "type:issue repo:organization/repository"
+	query := options.BuildQuey("repo:organization/repository")
 	if query != expectedQuery {
 		t.Fatalf("Default QueryOptions query expected to be %q but got %q", expectedQuery, query)
 	}

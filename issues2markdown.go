@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"context"
 	"html/template"
-	"log"
 	"strings"
 
 	"github.com/google/go-github/github"
@@ -30,29 +29,33 @@ import (
 // IssuesToMarkdown is the main type to interact, query and render issues to
 // Markdown
 type IssuesToMarkdown struct {
-	client      *github.Client
 	GithubToken string
-	Username    string
+	client      *github.Client
+	User        *github.User
 }
 
-// NewIssuesToMarkdown creates an IssuesToMarkdown instance and gets
-// authentication information
+// NewIssuesToMarkdown creates an IssuesToMarkdown instance
 func NewIssuesToMarkdown(provider *github.Client) (*IssuesToMarkdown, error) {
 	i2md := &IssuesToMarkdown{
 		client: provider,
 	}
-
-	ctx := context.Background()
-
-	// get user information
-	user, _, err := i2md.client.Users.Get(ctx, "")
+	user, err := i2md.Authorize()
 	if err != nil {
-		log.Printf("ERROR: %s", err)
 		return nil, err
 	}
-	i2md.Username = user.GetLogin()
-
+	i2md.User = user
 	return i2md, nil
+}
+
+// Authorize gets authentication information
+func (im *IssuesToMarkdown) Authorize() (*github.User, error) {
+	ctx := context.Background()
+	// get user information
+	user, _, err := im.client.Users.Get(ctx, "")
+	if err != nil {
+		return nil, err
+	}
+	return user, err
 }
 
 // Query queries the provider and returns the list of Issues that match
@@ -63,13 +66,11 @@ func (im *IssuesToMarkdown) Query(options *QueryOptions, q string) ([]Issue, err
 	// query issues
 	var result []Issue
 	query := options.BuildQuey(q)
-	log.Printf("Search Query: %s\n", query)
 
 	githubOptions := &github.SearchOptions{}
 	for {
 		listResult, response, err := im.client.Search.Issues(ctx, query, githubOptions)
 		if err != nil {
-			log.Printf("ERROR: %s", err)
 			return nil, err
 		}
 

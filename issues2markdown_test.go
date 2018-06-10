@@ -18,6 +18,7 @@
 package issues2markdown_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/issues2markdown/issues2markdown"
+	"golang.org/x/oauth2"
 )
 
 func testMethod(t *testing.T, r *http.Request, want string) {
@@ -49,9 +51,18 @@ func providerSetup(t *testing.T) (client *github.Client, mux *http.ServeMux, ser
 	// server is a test HTTP server used to provide mock API responses.
 	server := httptest.NewServer(apiHandler)
 
+	ctx := context.Background()
+
 	// client is the GitHub client being tested and is
 	// configured to use test server.
-	client = github.NewClient(nil)
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{
+			AccessToken: "github_token",
+		},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client = github.NewClient(tc)
+
 	url, _ := url.Parse(server.URL + "/")
 	client.BaseURL = url
 	client.UploadURL = url
@@ -63,6 +74,7 @@ func TestInstanceIssuesToMarkdown(t *testing.T) {
 	issuesProvider, mux, _, teardown := providerSetup(t)
 	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		fmt.Fprint(w, `{"login": "username"}`)
 	})
 	defer teardown()
@@ -70,5 +82,91 @@ func TestInstanceIssuesToMarkdown(t *testing.T) {
 	_, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestInstanceIssuesToMarkdownUnauthorized(t *testing.T) {
+	issuesProvider, mux, _, teardown := providerSetup(t)
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		http.Error(w, "Unauthorized", 401)
+	})
+	defer teardown()
+
+	_, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
+	if err == nil {
+		t.Fatal(err)
+	}
+}
+
+func TestQuery(t *testing.T) {
+	issuesProvider, mux, _, teardown := providerSetup(t)
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		fmt.Fprint(w, `{"login": "username"}`)
+	})
+	mux.HandleFunc("/search/issues", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		fmt.Fprint(w, `{}`)
+	})
+	defer teardown()
+
+	i2md, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	q := ""
+	options := issues2markdown.NewQueryOptions()
+	_, err = i2md.Query(options, q)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRender(t *testing.T) {
+	issuesProvider, mux, _, teardown := providerSetup(t)
+	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		fmt.Fprint(w, `{"login": "username"}`)
+	})
+	issues := []issues2markdown.Issue{
+		{
+			Number:  1,
+			Title:   "Issue title 1",
+			State:   "open",
+			URL:     "https://api.github.com/repos/username/repo/issues/1",
+			HTMLURL: "https://github.com/username/repo/issues/1",
+		},
+		{
+			Number:  2,
+			Title:   "Issue title 2",
+			State:   "closed",
+			URL:     "https://api.github.com/repos/username/repo/issues/2",
+			HTMLURL: "https://github.com/username/repo/issues/2",
+		},
+	}
+	defer teardown()
+
+	i2md, err := issues2markdown.NewIssuesToMarkdown(issuesProvider)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	options := issues2markdown.NewRenderOptions()
+	markdown, err := i2md.Render(issues, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedMarkdown := `- [ ] username/repo : [#1 Issue title 1](https://github.com/username/repo/issues/1)
+- [x] username/repo : [#2 Issue title 2](https://github.com/username/repo/issues/2)`
+
+	if markdown != expectedMarkdown {
+		t.Fatalf("Expected %q but got %q", expectedMarkdown, markdown)
 	}
 }
